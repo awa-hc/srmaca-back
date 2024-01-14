@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,13 @@ func main() {
 	}
 
 	route := gin.Default()
+
+	route.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
+		AllowHeaders: []string{"*"},
+	}))
+
 	route.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello World",
