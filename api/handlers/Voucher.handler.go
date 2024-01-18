@@ -68,10 +68,12 @@ func CreateVoucher(c *gin.Context) {
 	}
 
 	voucher := models.Voucher{
-		UserID:    userID,
-		ProductID: request.ProductID,
-		Glosa:     request.Glosa,
-		Img:       filename,
+		UserID:        userID,
+		ProductID:     request.ProductID,
+		Glosa:         request.Glosa,
+		Quantity:      request.Quantity,
+		PaymentMethod: request.PaymentMethod,
+		Img:           filename,
 	}
 
 	if err := database.DB.Create(&voucher).Error; err != nil {
