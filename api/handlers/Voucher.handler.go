@@ -24,6 +24,17 @@ func CreateVoucher(c *gin.Context) {
 		return
 	}
 
+	// Si el método de pago es "Transferencia Bancaria", entonces la imagen es requerida
+	if request.PaymentMethod == "transfer" && request.Img == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image is required for bank transfer"})
+		return
+	}
+
+	// Si el método de pago es "Efectivo", entonces la imagen no es requerida
+	if request.PaymentMethod == "cash" {
+		request.Img = "" // Asegúrate de que la imagen esté vacía
+	}
+
 	// Extraer el tipo de imagen y los datos base64 del campo "img"
 	parts := strings.Split(request.Img, ";base64,")
 	if len(parts) != 2 {
