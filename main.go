@@ -34,9 +34,10 @@ func main() {
 	route := gin.Default()
 
 	route.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
-		AllowHeaders: []string{"*"},
+		AllowOrigins:     []string{"http://localhost:4321"},
+		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
 	}))
 
 	route.GET("/", func(c *gin.Context) {

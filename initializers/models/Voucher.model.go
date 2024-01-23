@@ -11,5 +11,6 @@ type Voucher struct {
 	Img           string `json:"img"`
 	PaymentMethod string `json:"payment_method"`
 	Quantity      uint   `json:"quantity"`
+	Amount        uint   `json:"amount"`
 	Users         Users  `gorm:"foreignKey:UserID"`
 }
