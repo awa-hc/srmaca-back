@@ -34,7 +34,7 @@ func main() {
 	route := gin.Default()
 
 	route.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:4321"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -73,5 +73,5 @@ func main() {
 		voucherGroup.GET("/images/:id", handlers.GetVoucherImage)
 	}
 
-	route.Run(":" + Port)
+	route.Run("0.0.0.0:" + Port)
 }
