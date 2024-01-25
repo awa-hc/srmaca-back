@@ -6,4 +6,5 @@ RUN go build -o backend
 FROM alpine 
 WORKDIR /app
 COPY --from=builder /app/backend .
+COPY .env .
 CMD ["./backend"]
