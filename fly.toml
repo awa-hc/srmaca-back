@@ -1,20 +1,19 @@
-# fly.toml app configuration file generated for srmaca on 2024-01-23T23:19:27-04:00
+# fly.toml app configuration file generated for srmacaback on 2024-01-24T21:24:48-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "srmaca"
+app = "srmacaback"
 primary_region = "scl"
 
 [build]
-  image = "golang"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = false
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
 
 [[vm]]
