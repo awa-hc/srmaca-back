@@ -73,5 +73,5 @@ func main() {
 		voucherGroup.GET("/images/:id", handlers.GetVoucherImage)
 	}
 
-	route.Run("0.0.0.0:" + Port)
+	route.Run("0.0.0.0:8080")
 }
