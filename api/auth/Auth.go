@@ -1,6 +1,9 @@
+// auth.go
+
 package auth
 
 import (
+	"backend/api/email"
 	"backend/initializers/database"
 	"backend/initializers/models"
 	"net/http"
@@ -23,6 +26,7 @@ func SignUp(c *gin.Context) {
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "json invalid"})
+		return
 	}
 	if len(body.Password) < 8 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
@@ -55,7 +59,21 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "user created successfully"})
+	// Generar token de verificación
+	verificationToken, err := email.GenerateVerificationToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate verification token"})
+		return
+	}
+
+	// Enviar correo de verificación
+	err = email.SendVerificationEmail(user.Email, user.FullName, verificationToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to send verification email"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user created successfully, check your email for verification"})
 }
 
 func Login(c *gin.Context) {
@@ -134,4 +152,31 @@ func ValidateAdmin(C *gin.Context) {
 		return
 	}
 	C.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func VerifyEmail(c *gin.Context) {
+	token := c.Param("token")
+
+	userID, err := email.VerifyVerificationToken(token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid verification token"})
+		return
+	}
+
+	// Actualizar el estado de verificación del correo electrónico en la base de datos
+	var user models.Users
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
+		return
+	}
+
+	if user.EmailVerified {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email already verified"})
+		return
+	}
+
+	user.EmailVerified = true
+	database.DB.Save(&user)
+
+	c.JSON(http.StatusOK, gin.H{"message": "email verified successfully"})
 }
