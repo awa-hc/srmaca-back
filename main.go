@@ -6,6 +6,7 @@ import (
 	"backend/api/middleware"
 	"backend/initializers"
 	"backend/initializers/database"
+	"net/http"
 	"os"
 	"os/exec"
 
@@ -36,9 +37,13 @@ func main() {
 	route.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://srmaca.vercel.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
+
+	route.OPTIONS("/*any", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 
 	route.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
