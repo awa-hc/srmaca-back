@@ -154,7 +154,7 @@ func ValidateAdmin(C *gin.Context) {
 	C.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-func VerifyEmail(c *gin.Context) {
+/* func VerifyEmail(c *gin.Context) {
 	token := c.Param("token")
 
 	userID, err := email.VerifyVerificationToken(token)
@@ -179,4 +179,4 @@ func VerifyEmail(c *gin.Context) {
 	database.DB.Save(&user)
 
 	c.JSON(http.StatusOK, gin.H{"message": "email verified successfully"})
-}
+} */

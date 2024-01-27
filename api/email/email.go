@@ -22,7 +22,7 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 	subject := "Verificación de Correo Electrónico"
 	body := "Hola " + username + ",\n\n" +
 		"Gracias por registrarte en nuestro servicio. Para verificar tu correo electrónico, haz clic en el siguiente enlace:\n\n" +
-		"http://localhost:4321/auth/verify/" + verificationToken + "\n\n" +
+		"http://localhost:4321/auth/verify?token=" + verificationToken + "\n\n" +
 		"Este enlace expirará en 24 horas.\n\n" +
 		"Gracias,\nTu Equipo"
 
