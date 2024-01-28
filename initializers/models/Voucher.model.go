@@ -13,4 +13,5 @@ type Voucher struct {
 	Quantity      uint   `json:"quantity"`
 	Amount        uint   `json:"amount"`
 	Users         Users  `gorm:"foreignKey:UserID"`
+	Status        bool   `json:"status"`
 }

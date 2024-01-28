@@ -87,7 +87,10 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.Users
-	database.DB.First(&user, "email = ?", body.Email)
+	if err := database.DB.First(&user, "email = ?", body.Email).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email"})
+		return
+	}
 
 	if user.ID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email"})

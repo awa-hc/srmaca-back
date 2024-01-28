@@ -23,9 +23,6 @@ func CreateVoucher(c *gin.Context) {
 	// Volver a escribir el cuerpo de la solicitud porque io.ReadAll lo consume
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
-	// Imprimir el cuerpo de la solicitud
-	fmt.Println("Request Body:", string(body))
-
 	var request models.Voucher
 	user, _ := c.Get("user")
 	userID := user.(models.Users).ID
@@ -34,8 +31,6 @@ func CreateVoucher(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
-
-	fmt.Printf("Request: %+v\n", request)
 
 	// Si el método de pago es "Transferencia Bancaria", entonces la imagen es requerida
 	if request.PaymentMethod == "transfer" {
@@ -89,6 +84,7 @@ func CreateVoucher(c *gin.Context) {
 		PaymentMethod: request.PaymentMethod,
 		Img:           request.Img,
 		Amount:        request.Amount,
+		Status:        false,
 	}
 
 	if err := database.DB.Create(&voucher).Error; err != nil {
@@ -127,4 +123,21 @@ func GetVouchers(C *gin.Context) {
 		return
 	}
 	C.JSON(http.StatusOK, vouchers)
+}
+
+func GetVoucherByUserId(c *gin.Context) {
+	var vouchers []models.Voucher
+	user, _ := c.Get("user")
+	userID := user.(models.Users).ID
+	if err := database.DB.Where("user_id = ?", userID).Preload("Users").Find(&vouchers).Error; err != nil {
+		c.JSON(400, gin.H{"error": "failed to get the vouchers"})
+		return
+	}
+
+	if len(vouchers) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "You don't have any vouchers yet"})
+		return
+	}
+
+	c.JSON(http.StatusOK, vouchers)
 }

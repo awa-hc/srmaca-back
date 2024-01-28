@@ -78,8 +78,13 @@ func main() {
 		voucherGroup.GET("/:id", handlers.GetVoucher)
 		voucherGroup.GET("/", handlers.GetVouchers)
 		voucherGroup.GET("/images/:id", handlers.GetVoucherImage)
+		voucherGroup.GET("/user/", handlers.GetVoucherByUserId)
 	}
 
-	//route.Run("0.0.0.0:8080")
+	userGroup := route.Group("/user")
+	userGroup.Use(middleware.RequireAuth)
+	{
+		userGroup.GET("/", handlers.GetUser)
+	}
 	route.Run(":" + Port)
 }
