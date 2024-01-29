@@ -12,7 +12,7 @@ import (
 )
 
 func VerifyEmail(c *gin.Context) {
-	token := c.Query("token")
+	token := c.Param("token")
 
 	// Verificar el token
 	userID, err := email.VerifyVerificationToken(token)

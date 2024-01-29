@@ -21,10 +21,10 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 	// Construir el cuerpo del correo con un enlace de verificación
 	subject := "Verificación de Correo Electrónico"
 	body := "Hola " + username + ",\n\n" +
-		"Gracias por registrarte en nuestro servicio. Para verificar tu correo electrónico, haz clic en el siguiente enlace:\n\n" +
-		"http://localhost:4321/auth/verify?token=" + verificationToken + "\n\n" +
+		"Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, haz clic en el siguiente enlace:\n\n" +
+		"https://srmaca.vercel.app/auth/verify?token=" + verificationToken + "\n\n" +
 		"Este enlace expirará en 24 horas.\n\n" +
-		"Gracias,\nTu Equipo"
+		"Gracias,\n"
 
 	// Configurar mail sender
 	m := gomail.NewMessage()
