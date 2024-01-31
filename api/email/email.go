@@ -125,3 +125,26 @@ func VerifyVerificationToken(tokenString string) (uint, error) {
 
 	return 0, errors.New("invalid token")
 }
+
+func SendMailContact(name, email, message string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_FROM"))
+	m.SetHeader("To", os.Getenv("EMAIL_TO"))
+	m.SetHeader("Subject", "Mensaje de contacto")
+
+	// Cuerpo del correo
+	body := "Nombre: " + name + "<br>"
+	body += "Correo: " + email + "<br>"
+	body += "Mensaje: " + message + "<br>"
+
+	m.SetBody("text/html", body)
+
+	//Configurar el servidor SMTP
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), 465, os.Getenv("EMAIL_FROM"), os.Getenv("EMAIL_PASSWORD"))
+
+	//Enviar el correo
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}

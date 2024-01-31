@@ -86,6 +86,10 @@ func main() {
 	{
 		userGroup.GET("/", handlers.GetUser)
 	}
+	emailGroup := route.Group("/email")
+	{
+		emailGroup.POST("/contact", handlers.ContactEmail)
+	}
 	// route.Run(":" + Port)
 	route.Run("0.0.0.0:" + Port)
 }
