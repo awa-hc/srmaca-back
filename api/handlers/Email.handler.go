@@ -11,14 +11,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ContactForm struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Message string `json:"message"`
+}
+
 func ContactEmail(c *gin.Context) {
-	// Obtener los datos del formulario
-	name := c.PostForm("name")
-	emailAddress := c.PostForm("email")
-	message := c.PostForm("message")
+	var form ContactForm
+
+	if err := c.BindJSON(&form); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Falla en parsear el cuerpo de la solicitud❌"})
+		return
+	}
 
 	// Enviar el correo
-	if err := email.SendMailContact(name, emailAddress, message); err != nil {
+	if err := email.SendMailContact(form.Name, form.Email, form.Message); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Falla en enviar el correo❌"})
 		return
 	}
