@@ -48,7 +48,13 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	user := models.Users{Email: body.Email, Password: string(hash), FullName: body.Fullname}
+	user := models.Users{
+		Email:         body.Email,
+		Password:      string(hash),
+		FullName:      body.Fullname,
+		Phone:         body.Phone,
+		Address:       body.Address,
+		EmailVerified: false}
 
 	user.Role = "user"
 
@@ -66,14 +72,9 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	// Enviar correo de verificación
-	err = email.SendVerificationEmail(user.Email, user.FullName, verificationToken)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to send verification email"})
-		return
-	}
+	go email.SendVerificationEmail(user.Email, user.FullName, verificationToken)
 
-	c.JSON(http.StatusOK, gin.H{"message": "user created successfully, check your email for verification"})
+	c.JSON(http.StatusOK, gin.H{"message": "user created successfully, check your email for verification", "user": user})
 }
 
 func Login(c *gin.Context) {
@@ -100,6 +101,7 @@ func Login(c *gin.Context) {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid password"})
+		return
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

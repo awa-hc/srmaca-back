@@ -35,7 +35,7 @@ func main() {
 	route := gin.Default()
 
 	route.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:4321"},
+		AllowOrigins: []string{"http://localhost:3001"},
 		// AllowOrigins:     []string{"https://srmaca.vercel.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
@@ -60,21 +60,14 @@ func main() {
 	}
 	route.GET("/validate", middleware.RequireAuth, auth.Validate)
 	route.GET("/validateadmin", middleware.RequireAuth, middleware.RequireAdmin, auth.ValidateAdmin)
-	orderGroup := route.Group("/order")
-	orderGroup.Use(middleware.RequireAuth)
-	{
-		orderGroup.POST("/create", handlers.CreateOrder)
-		orderGroup.GET("/get", handlers.GetOrders)
-		orderGroup.GET("/getbyuserid", handlers.GetOrdersByUserID)
-		orderGroup.GET("/get/:id", handlers.GetOrder)
-		orderGroup.DELETE("/delete/:id", handlers.DeteleOrder)
-		orderGroup.PUT("/update/:id", middleware.RequireAdmin, handlers.UpdateOrder)
-	}
+
 	voucherGroup := route.Group("/voucher")
 	voucherGroup.Use(middleware.RequireAuth)
 	{
+
 		voucherGroup.POST("/create", handlers.CreateVoucher)
 		voucherGroup.DELETE("/delete/:id", handlers.DeleteVoucher)
+		voucherGroup.GET("/id/:id", handlers.GetVoucherById)
 		voucherGroup.GET("/:id", handlers.GetVoucher)
 		voucherGroup.GET("/", handlers.GetVouchers)
 		voucherGroup.GET("/images/:id", handlers.GetVoucherImage)
@@ -85,7 +78,17 @@ func main() {
 	userGroup.Use(middleware.RequireAuth)
 	{
 		userGroup.GET("/", handlers.GetUser)
+		userGroup.GET("/:id", handlers.GetUserById)
 	}
+	productGroup := route.Group("/product")
+	productGroup.Use(middleware.RequireAuth)
+	{
+		productGroup.POST("/create", handlers.CreateProduct)
+		productGroup.GET("/", handlers.GetProducts)
+		productGroup.GET("/:id", handlers.GetProduct)
+		productGroup.PUT("/update/:id", handlers.UpdateProduct)
+	}
+
 	route.Run(":" + Port)
 	// route.Run("0.0.0.0:" + Port)
 }

@@ -20,7 +20,6 @@ func CreateVoucher(c *gin.Context) {
 	// Leer el cuerpo de la solicitud
 	body, _ := io.ReadAll(c.Request.Body)
 
-	// Volver a escribir el cuerpo de la solicitud porque io.ReadAll lo consume
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	var request models.Voucher
@@ -78,12 +77,11 @@ func CreateVoucher(c *gin.Context) {
 
 	voucher := models.Voucher{
 		UserID:        userID,
-		ProductID:     request.ProductID,
 		Glosa:         request.Glosa,
-		Quantity:      request.Quantity,
 		PaymentMethod: request.PaymentMethod,
 		Img:           request.Img,
-		Amount:        request.Amount,
+		TotalPrice:    request.TotalPrice,
+		Products:      request.Products,
 		Status:        false,
 	}
 
@@ -92,9 +90,17 @@ func CreateVoucher(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Voucher uploaded successfully",
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "Voucher uploaded successfully", "voucher": voucher})
+}
+
+func GetVoucherById(c *gin.Context) {
+	var voucher models.Voucher
+	id := c.Param("id")
+	if err := database.DB.Where("id = ?", id).Preload("Users").Preload("Products").First(&voucher).Error; err != nil {
+		c.JSON(400, gin.H{"error": "failed to get the voucher"})
+		return
+	}
+	c.JSON(http.StatusOK, voucher)
 }
 
 func DeleteVoucher(c *gin.Context) {
@@ -109,7 +115,7 @@ func DeleteVoucher(c *gin.Context) {
 func GetVoucher(c *gin.Context) {
 	var voucher models.Voucher
 	id := c.Param("id")
-	if err := database.DB.Where("id = ?", id).Preload("Users").First(&voucher).Error; err != nil {
+	if err := database.DB.Where("id = ?", id).Preload("Users").Preload("Products").First(&voucher).Error; err != nil {
 		c.JSON(400, gin.H{"error": "failed to get the order"})
 		return
 	}
@@ -130,7 +136,7 @@ func GetVoucherByUserId(c *gin.Context) {
 	user, _ := c.Get("user")
 	userID := user.(models.Users).ID
 	if err := database.DB.Where("user_id = ?", userID).Preload("Users").Find(&vouchers).Error; err != nil {
-		c.JSON(400, gin.H{"error": "failed to get the vouchers"})
+		c.JSON(400, gin.H{"error": "failed to get the vouchers by user id"})
 		return
 	}
 
