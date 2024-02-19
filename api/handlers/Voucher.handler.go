@@ -95,19 +95,6 @@ func CreateVoucher(c *gin.Context) {
 		return
 	}
 
-	// Preparar mensaje
-	message := "Su voucher N°" + string(rune(voucher.ID)) + " fue creado"
-
-	var sender = "+59176853150"
-
-	// Enviar WhatsApp
-	err := SendWhatsApp(sender, phone, "Gn8txHJ2aREn", message)
-
-	if err != nil {
-		log.Printf("Error sending WhatsApp: %v", err)
-		// Decidir si retornas error o continuas
-	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "Voucher uploaded successfully", "voucher": voucher})
 }
 
