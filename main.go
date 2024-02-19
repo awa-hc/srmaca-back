@@ -35,8 +35,8 @@ func main() {
 	route := gin.Default()
 
 	route.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:3001"},
-		// AllowOrigins:     []string{"https://srmaca.vercel.app"},
+		// AllowOrigins: []string{"http://localhost:3001"},
+		AllowOrigins:     []string{"https://srmaca.vercel.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -89,6 +89,6 @@ func main() {
 		productGroup.PUT("/update/:id", handlers.UpdateProduct)
 	}
 
-	route.Run(":" + Port)
-	// route.Run("0.0.0.0:" + Port)
+	// route.Run(":" + Port)
+	route.Run("0.0.0.0:" + Port)
 }
