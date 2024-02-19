@@ -17,22 +17,44 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 	// Leer variables de entorno
 	email := os.Getenv("EMAIL_FROM")
 	password := os.Getenv("EMAIL_PASSWORD")
+	// baseURL := "http://localhost:4321/auth/verify"
+	baseURL := "https://srmaca.vercel.app/auth/verify"
+	verificationURL := baseURL + "?token=" + verificationToken
 
 	// Construir el cuerpo del correo con un enlace de verificación
 	subject := "Verificación de Correo Electrónico"
-	body := "Hola " + username + ",\n\n" +
-		"Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, haz clic en el siguiente enlace:\n\n" +
-		// "https://srmaca.vercel.app/auth/verify?token=" + verificationToken + "\n\n" +
-		"http://localhost:4321/auth/verify?token=" + verificationToken + "\n\n" +
-		"Este enlace expirará en 24 horas.\n\n" +
-		"Gracias,\n"
+	htmlBody := `
+		<html>
+		<body style="font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+			<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
+			<h1 style="font-size: 24px; color: #444;">Hola ` + username + `!</h1>
+			<p style="line-height: 1.6;">
+    			Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, haz clic en el siguiente botón:
+			</p>
+    		<div style="text-align: center;">
+    			<form action="` + verificationURL + `" method="get">
+        			<button style="background: #03383e; color: #fff; border: 0; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer;">Confirmar Correo</button>
+    			</form>
+    		</div>
+    		<p style="opacity: 0.8;">
+    			Este enlace expirará en 24 horas.
+    		</p>
+    		<p style="margin-bottom: 0;">
+    			Gracias,<br>
+    			El Equipo de Sr Maca
+			</p>
+			</div>
+		</body>
+		</html>
+`
 
 	// Configurar mail sender
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
-	m.SetBody("text/plain", body)
+	m.SetHeader("Content-Type", "text/html; charset=UTF-8")
+	m.SetBody("text/html", htmlBody)
 
 	// Configurar dialer
 	d := gomail.NewDialer("smtp.hostinger.com", 465, email, password)
@@ -102,4 +124,27 @@ func VerifyVerificationToken(tokenString string) (uint, error) {
 	}
 
 	return 0, errors.New("invalid token")
+}
+
+func SendMailContact(name, email, message string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL_FROM"))
+	m.SetHeader("To", os.Getenv("EMAIL_TO"))
+	m.SetHeader("Subject", "Mensaje de contacto")
+
+	// Cuerpo del correo
+	body := "Nombre: " + name + "<br>"
+	body += "Correo: " + email + "<br>"
+	body += "Mensaje: " + message + "<br>"
+
+	m.SetBody("text/html", body)
+
+	//Configurar el servidor SMTP
+	d := gomail.NewDialer(os.Getenv("EMAIL_HOST"), 465, os.Getenv("EMAIL_FROM"), os.Getenv("EMAIL_PASSWORD"))
+
+	//Enviar el correo
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
 }

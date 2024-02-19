@@ -5,12 +5,16 @@ import (
 	"backend/initializers/database"
 	"backend/initializers/models"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +28,7 @@ func CreateVoucher(c *gin.Context) {
 
 	var request models.Voucher
 	user, _ := c.Get("user")
+	phone := user.(models.Users).Phone
 	userID := user.(models.Users).ID
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -90,6 +95,19 @@ func CreateVoucher(c *gin.Context) {
 		return
 	}
 
+	// Preparar mensaje
+	message := "Su voucher N°" + string(rune(voucher.ID)) + " fue creado"
+
+	var sender = "+59176853150"
+
+	// Enviar WhatsApp
+	err := SendWhatsApp(sender, phone, "Gn8txHJ2aREn", message)
+
+	if err != nil {
+		log.Printf("Error sending WhatsApp: %v", err)
+		// Decidir si retornas error o continuas
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Voucher uploaded successfully", "voucher": voucher})
 }
 
@@ -146,4 +164,35 @@ func GetVoucherByUserId(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, vouchers)
+}
+
+func SendWhatsApp(sender, phone, apiKey, message string) error {
+
+	// Cliente HTTP
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	// Preparar datos
+	apiURL := "https://api.textmebot.com/send.php"
+	data := url.Values{}
+	data.Set("recipient", phone)
+	data.Set("sender", sender)
+	data.Set("apikey", apiKey)
+	data.Set("text", message)
+
+	// Enviar solicitud
+	resp, err := client.Get(apiURL + "?" + data.Encode())
+
+	if err != nil {
+		log.Printf("Error sending WhatsApp: %v", err)
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		log.Printf("Status error: %d", resp.StatusCode)
+		return errors.New("error sending msg")
+	}
+
+	return nil
 }
