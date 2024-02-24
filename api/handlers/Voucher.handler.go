@@ -28,7 +28,6 @@ func CreateVoucher(c *gin.Context) {
 
 	var request models.Voucher
 	user, _ := c.Get("user")
-	phone := user.(models.Users).Phone
 	userID := user.(models.Users).ID
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -88,6 +87,7 @@ func CreateVoucher(c *gin.Context) {
 		TotalPrice:    request.TotalPrice,
 		Products:      request.Products,
 		Status:        false,
+		Delivery:      request.Delivery,
 	}
 
 	if err := database.DB.Create(&voucher).Error; err != nil {
@@ -182,4 +182,19 @@ func SendWhatsApp(sender, phone, apiKey, message string) error {
 	}
 
 	return nil
+}
+
+func ConfirmVoucher(c *gin.Context) {
+	var voucher models.Voucher
+	id := c.Param("id")
+	if err := database.DB.Where("id = ?", id).Preload("Users").First(&voucher).Error; err != nil {
+		c.JSON(400, gin.H{"error": "failed to get the voucher"})
+		return
+	}
+	voucher.Status = true
+	if err := database.DB.Save(&voucher).Error; err != nil {
+		c.JSON(400, gin.H{"error": "failed to update the voucher"})
+		return
+	}
+	c.JSON(http.StatusOK, voucher)
 }

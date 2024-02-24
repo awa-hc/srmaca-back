@@ -16,4 +16,5 @@ type Voucher struct {
 	TotalPrice    uint           `json:"TotalPrice"`
 	Users         Users          `gorm:"foreignKey:UserID"`
 	Status        bool           `json:"status"`
+	Delivery      bool           `json:"delivery"`
 }
