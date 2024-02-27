@@ -35,8 +35,8 @@ func main() {
 	route := gin.Default()
 
 	route.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:3001"},
-		// AllowOrigins:     []string{"https://srmaca.vercel.app"},
+		// AllowOrigins: []string{"http://localhost:3001"},
+		AllowOrigins:     []string{"https://srmaca.vercel.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -88,6 +88,12 @@ func main() {
 		productGroup.GET("/", handlers.GetProducts)
 		productGroup.GET("/:id", handlers.GetProduct)
 		productGroup.PUT("/update/:id", handlers.UpdateProduct)
+	}
+
+	emailGroup := route.Group("/email")
+	emailGroup.Use(middleware.RequireAuth)
+	{
+		emailGroup.POST("/contact", handlers.ContactEmail)
 	}
 
 	// route.Run(":" + Port)
