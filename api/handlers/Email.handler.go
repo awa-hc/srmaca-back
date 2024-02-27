@@ -15,6 +15,7 @@ type ContactForm struct {
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Phone   string `json:"phone"`
+	Subject string `json:"subject"`
 	Message string `json:"message"`
 }
 
@@ -27,7 +28,7 @@ func ContactEmail(c *gin.Context) {
 	}
 
 	// Enviar el correo
-	if err := email.SendMailContact(form.Name, form.Email, form.Phone, form.Message); err != nil {
+	if err := email.SendMailContact(form.Name, form.Email, form.Phone, form.Subject, form.Message); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Falla en enviar el correo❌"})
 		return
 	}

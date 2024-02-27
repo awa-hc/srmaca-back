@@ -126,7 +126,7 @@ func VerifyVerificationToken(tokenString string) (uint, error) {
 	return 0, errors.New("invalid token")
 }
 
-func SendMailContact(name, email, phone, message string) error {
+func SendMailContact(name, email, phone, subject, message string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("EMAIL_FROM"))
 	m.SetHeader("To", os.Getenv("EMAIL_TO"))
@@ -136,6 +136,7 @@ func SendMailContact(name, email, phone, message string) error {
 	body := "Nombre: " + name + "<br>"
 	body += "Correo: " + email + "<br>"
 	body += "Teléfono" + phone + "<br>"
+	body += "Asunto" + subject + "<br>"
 	body += "Mensaje: " + message + "<br>"
 
 	m.SetBody("text/html", body)

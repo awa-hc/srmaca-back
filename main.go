@@ -91,7 +91,6 @@ func main() {
 	}
 
 	emailGroup := route.Group("/email")
-	emailGroup.Use(middleware.RequireAuth)
 	{
 		emailGroup.POST("/contact", handlers.ContactEmail)
 	}
