@@ -59,7 +59,7 @@ func main() {
 		authGroup.GET("/verify/:token", handlers.VerifyEmail)
 	}
 	route.GET("/validate", middleware.RequireAuth, auth.Validate)
-	route.GET("/validateadmin", middleware.RequireAuth, middleware.RequireAdmin, auth.ValidateAdmin)
+	route.GET("/validateadmin", middleware.RequireAuth, auth.ValidateAdmin)
 
 	voucherGroup := route.Group("/voucher")
 	voucherGroup.Use(middleware.RequireAuth)
