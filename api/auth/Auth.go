@@ -137,6 +137,48 @@ func ValidateAdmin(C *gin.Context) {
 	C.JSON(http.StatusOK, gin.H{"user": user})
 }
 
+type ResetPasswordRequest struct {
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
+func ResetPassword(c *gin.Context) {
+	var body ResetPasswordRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "json invalid"})
+		return
+	}
+
+	// Verificar si la contraseña y la confirmación coinciden
+	if body.Password != body.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "passwords do not match"})
+		return
+	}
+
+	// Obtener el ID de usuario del contexto
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user ID not found in context"})
+		return
+	}
+	uid := userID.(uint)
+
+	// Generar el hash de la nueva contraseña
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+		return
+	}
+
+	// Actualizar la contraseña del usuario en la base de datos
+	if err := database.DB.Model(&models.Users{}).Where("id = ?", uid).Update("password", string(hash)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "password reset successfully"})
+}
+
 func ForgotPassword(c *gin.Context) {
 	var body struct {
 		Email string `json:"email"`

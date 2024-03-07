@@ -57,6 +57,8 @@ func main() {
 		authGroup.POST("/signup", auth.SignUp)
 		authGroup.POST("/login", auth.Login)
 		authGroup.GET("/verify/:token", handlers.VerifyEmail)
+		authGroup.POST("/forgotPassword", auth.ForgotPassword)
+		authGroup.POST("/resetPassword", auth.ResetPassword)
 	}
 	route.GET("/validate", middleware.RequireAuth, auth.Validate)
 	route.GET("/validateadmin", middleware.RequireAuth, auth.ValidateAdmin)

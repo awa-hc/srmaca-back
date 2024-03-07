@@ -157,8 +157,8 @@ func SendResetPasswordEmail(to, resetToken string) error {
 	// Leer variables de entorno
 	email := os.Getenv("EMAIL_FROM")
 	password := os.Getenv("EMAIL_PASSWORD")
-	// baseURL := "http://localhost:4321/auth/reset-password"
-	baseURL := "https://srmaca.vercel.app/auth/reset-password"
+	// baseURL := "http://localhost:3000/reset-password"
+	baseURL := "https://srmaca.vercel.app/reset-password"
 	resetPasswordURL := baseURL + "?token=" + resetToken
 
 	// Construir el cuerpo del correo con un enlace para restablecer la contraseña
