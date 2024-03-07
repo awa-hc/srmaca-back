@@ -28,7 +28,7 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 				<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
 					<h1 style="font-size: 24px; color: #444;">Hola ` + username + `!</h1>
 					<p style="line-height: 1.6;">
-						Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, puedes hacer clic en el siguiente botón o probar con el siguiente enlace si el botón no funciona correctamente:
+						Gracias por registrarte en Sr Maca.
 					</p>
 					<div style="text-align: center;">
 						<a href="` + verificationURL + `" target="_blank" style="text-decoration: none; color: #fff; background: #03383e; border: 0; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer;">Confirmar Correo</a>
