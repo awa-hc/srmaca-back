@@ -60,7 +60,7 @@ func main() {
 	{
 		authGroup.POST("/signup", auth.SignUp)
 		authGroup.POST("/login", auth.Login)
-		authGroup.GET("/verify/:token", handlers.VerifyEmail)
+		authGroup.POST("/verify/:token", handlers.VerifyEmail)
 		authGroup.POST("/forgotPassword", auth.ForgotPassword)
 		authGroup.POST("/resetPassword", auth.ResetPassword)
 	}
