@@ -18,7 +18,7 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 	email := os.Getenv("EMAIL_FROM")
 	password := os.Getenv("EMAIL_PASSWORD")
 	// baseURL := "http://localhost:4321/auth/verify"
-	baseURL := "https://srmaca.vercel.app/auth/verify"
+	baseURL := "https://srmaca.vercel.app/verify"
 	verificationURL := baseURL + "?token=" + verificationToken
 
 	// Construir el cuerpo del correo con un enlace de verificación
