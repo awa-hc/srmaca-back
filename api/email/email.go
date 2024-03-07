@@ -17,7 +17,6 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 	// Leer variables de entorno
 	email := os.Getenv("EMAIL_FROM")
 	password := os.Getenv("EMAIL_PASSWORD")
-	// baseURL := "http://localhost:4321/auth/verify"
 	baseURL := "https://srmaca.vercel.app/verify"
 	verificationURL := baseURL + "?token=" + verificationToken
 
@@ -29,12 +28,14 @@ func SendVerificationEmail(to, username, verificationToken string) error {
 			<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
 			<h1 style="font-size: 24px; color: #444;">Hola ` + username + `!</h1>
 			<p style="line-height: 1.6;">
-    			Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, haz clic en el siguiente botón:
+    			Gracias por registrarte en Sr Maca. Para verificar tu correo electrónico, puedes hacer clic en el siguiente botón o probar con el siguiente enlace si el botón no funciona correctamente:
 			</p>
     		<div style="text-align: center;">
     			<form action="` + verificationURL + `" method="get">
         			<button style="background: #03383e; color: #fff; border: 0; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer;">Confirmar Correo</button>
     			</form>
+				<p style="margin-top: 20px;">Si el botón de confirmación no funciona, prueba con este enlace:<br>
+				<a href="` + verificationURL + `" style="text-decoration: none; color: #03383e;">` + verificationURL + `</a></p>
     		</div>
     		<p style="opacity: 0.8;">
     			Este enlace expirará en 24 horas.
