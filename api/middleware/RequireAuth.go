@@ -226,5 +226,4 @@ func RequireAdmin(c *gin.Context) {
 			c.AbortWithStatus(http.StatusUnauthorized)
 		}
 	}
-
 }

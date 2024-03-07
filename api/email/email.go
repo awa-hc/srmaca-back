@@ -126,6 +126,7 @@ func VerifyVerificationToken(tokenString string) (uint, error) {
 	return 0, errors.New("invalid token")
 }
 
+// SendMailContact envia un correo con datos puestos por el usuario para comunicacion
 func SendMailContact(name, email, phone, subject, message string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("EMAIL_FROM"))
@@ -149,4 +150,80 @@ func SendMailContact(name, email, phone, subject, message string) error {
 		return err
 	}
 	return nil
+}
+
+// SendResetPasswordEmail envía un correo electrónico al usuario con un enlace para restablecer la contraseña.
+func SendResetPasswordEmail(to, resetToken string) error {
+	// Leer variables de entorno
+	email := os.Getenv("EMAIL_FROM")
+	password := os.Getenv("EMAIL_PASSWORD")
+	// baseURL := "http://localhost:4321/auth/reset-password"
+	baseURL := "https://srmaca.vercel.app/auth/reset-password"
+	resetPasswordURL := baseURL + "?token=" + resetToken
+
+	// Construir el cuerpo del correo con un enlace para restablecer la contraseña
+	subject := "Restablecer Contraseña - Sr Maca"
+	htmlBody := `
+		<html>
+		<body style="font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+			<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
+			<h1 style="font-size: 24px; color: #444;">Hola!</h1>
+			<p style="line-height: 1.6;">
+    			Haz clic en el siguiente enlace para restablecer tu contraseña:
+			</p>
+    		<div style="text-align: center;">
+    			<a href="` + resetPasswordURL + `" style="background: #03383e; color: #fff; border: 0; padding: 12px 24px; font-size: 16px; border-radius: 4px; text-decoration: none; cursor: pointer; display: inline-block;">Restablecer Contraseña</a>
+    		</div>
+    		<p style="opacity: 0.8;">
+    			Este enlace expirará en 1 hora.
+    		</p>
+    		<p style="margin-bottom: 0;">
+    			Gracias,<br>
+    			El Equipo de Sr Maca
+			</p>
+			</div>
+		</body>
+		</html>
+`
+
+	// Configurar mail sender
+	m := gomail.NewMessage()
+	m.SetHeader("From", email)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetHeader("Content-Type", "text/html; charset=UTF-8")
+	m.SetBody("text/html", htmlBody)
+
+	// Configurar dialer
+	d := gomail.NewDialer("smtp.hostinger.com", 465, email, password)
+	d.TLSConfig = &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         "smtp.hostinger.com",
+	}
+
+	// Enviar correo electrónico
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GenerateResetPasswordToken genera un token de restablecimiento de contraseña para un usuario.
+func GenerateResetPasswordToken(userID uint) (string, error) {
+	// Define la estructura del token
+	claims := jwt.MapClaims{
+		"sub": userID,
+		"exp": time.Now().Add(time.Hour).Unix(), // El token expirará en 1 hora
+		// Otros claims si es necesario
+	}
+
+	// Genera el token con el método de firma HMAC y la clave secreta
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
 }
