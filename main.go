@@ -43,6 +43,11 @@ func main() {
 	}))
 
 	route.OPTIONS("/*any", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "https://srmaca.vercel.app")
+		c.Header("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
 		c.Status(http.StatusOK)
 	})
 
@@ -56,7 +61,9 @@ func main() {
 	{
 		authGroup.POST("/signup", auth.SignUp)
 		authGroup.POST("/login", auth.Login)
-		authGroup.GET("/verify/:token", handlers.VerifyEmail)
+		authGroup.POST("/verify/:token", handlers.VerifyEmail)
+		authGroup.POST("/forgotPassword", auth.ForgotPassword)
+		authGroup.POST("/resetPassword", auth.ResetPassword)
 	}
 	route.GET("/validate", middleware.RequireAuth, auth.Validate)
 	route.GET("/validateadmin", middleware.RequireAuth, auth.ValidateAdmin)

@@ -122,28 +122,6 @@ func Login(c *gin.Context) {
 
 }
 
-// func VerifyEmail(c *gin.Context) {
-// 	email := c.Param("email")
-// 	var user models.Users
-
-// 	if err := database.DB.First(&user, "email = ?", email).Error; err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email"})
-// 		return
-// 	}
-
-// 	if user.EmailVerified {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "email already verified"})
-// 		return
-// 	}
-// 	if !user.EmailVerified {
-// 		user.EmailVerified = true
-// 		database.DB.Save(&user)
-// 		c.JSON(http.StatusOK, gin.H{"message": "email verified"})
-// 		return
-// 	}
-
-// }
-
 func Validate(c *gin.Context) {
 	user, _ := c.Get("user")
 	// id := user.(models.Users).ID
@@ -159,29 +137,72 @@ func ValidateAdmin(C *gin.Context) {
 	C.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-/* func VerifyEmail(c *gin.Context) {
-	token := c.Param("token")
+type ResetPasswordRequest struct {
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
 
-	userID, err := email.VerifyVerificationToken(token)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid verification token"})
+func ResetPassword(c *gin.Context) {
+	var body ResetPasswordRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "json invalid"})
 		return
 	}
 
-	// Actualizar el estado de verificación del correo electrónico en la base de datos
+	// Verificar si la contraseña y la confirmación coinciden
+	if body.Password != body.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "passwords do not match"})
+		return
+	}
+
+	// Obtener el ID de usuario del contexto
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user ID not found in context"})
+		return
+	}
+	uid := userID.(uint)
+
+	// Generar el hash de la nueva contraseña
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+		return
+	}
+
+	// Actualizar la contraseña del usuario en la base de datos
+	if err := database.DB.Model(&models.Users{}).Where("id = ?", uid).Update("password", string(hash)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "password reset successfully"})
+}
+
+func ForgotPassword(c *gin.Context) {
+	var body struct {
+		Email string `json:"email"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "json invalid"})
+		return
+	}
+
 	var user models.Users
-	if err := database.DB.First(&user, userID).Error; err != nil {
+	if err := database.DB.First(&user, "email = ?", body.Email).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
 		return
 	}
 
-	if user.EmailVerified {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "email already verified"})
+	// Generar token de restablecimiento de contraseña
+	resetToken, err := email.GenerateResetPasswordToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate reset password token"})
 		return
 	}
 
-	user.EmailVerified = true
-	database.DB.Save(&user)
+	// Envía el correo electrónico con el token de restablecimiento de contraseña
+	go email.SendResetPasswordEmail(user.Email, resetToken)
 
-	c.JSON(http.StatusOK, gin.H{"message": "email verified successfully"})
-} */
+	c.JSON(http.StatusOK, gin.H{"message": "reset password email sent"})
+}
