@@ -150,3 +150,51 @@ func SendMailContact(name, email, phone, subject, message string) error {
 	}
 	return nil
 }
+
+func SendVoucherCreated(to, username string) error {
+	email := os.Getenv("EMAIL_FROM")
+	password := os.Getenv("EMAIL_PASSWORD")
+	basseURL := "https://srmaca.vercel.app"
+	subject := "Sr Maca - Comprobante de Pedido"
+	htmlBody := `
+		<html>
+		<body style="font-family: Arial, Helvetica, sans-serif; font-size: 16px;">
+			<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
+			<h1 style="font-size: 24px; color: #444;">Hola ` + username + `!</h1>
+			<p style="line-height: 1.6;">
+				Gracias por tu compra en Sr Maca. Tu comprobante de pedido ha sido generado. Puedes verlo en el siguiente enlace:
+			</p>
+			<div style="text-align: center;">
+
+				<a href="` + basseURL + `/orders" style="background: #03383e; color: #fff; border: 0; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer; text-decoration: none;">Ver Comprobante</a>
+			</div>
+			<p style="margin-bottom: 0;">
+				Gracias,<br>
+				El Equipo de Sr Maca
+			</p>
+			</div>
+		</body>
+		</html>
+	`
+	m := gomail.NewMessage()
+	m.SetHeader("From", email)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetHeader("Content-Type", "text/html; charset=UTF-8")
+	m.SetBody("text/html", htmlBody)
+
+	// Configurar dialer
+	d := gomail.NewDialer("smtp.hostinger.com", 465, email, password)
+	d.TLSConfig = &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         "smtp.hostinger.com",
+	}
+
+	// Enviar email
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+
+	return nil
+
+}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/api/email"
 	"backend/api/utils"
 	"backend/initializers/database"
 	"backend/initializers/models"
@@ -92,6 +93,12 @@ func CreateVoucher(c *gin.Context) {
 
 	if err := database.DB.Create(&voucher).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the voucher record"})
+		return
+	}
+
+	err := email.SendVoucherCreated(user.(models.Users).Email, user.(models.Users).FullName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the email"})
 		return
 	}
 
@@ -197,4 +204,13 @@ func ConfirmVoucher(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, voucher)
+}
+
+func GetDeletedVouchers(c *gin.Context) {
+	var vouchers []models.Voucher
+	if err := database.DB.Unscoped().Where("deleted_at IS NOT NULL").Find(&vouchers).Error; err != nil {
+		c.JSON(400, gin.H{"error": "failed to get the deleted vouchers"})
+		return
+	}
+	c.JSON(http.StatusOK, vouchers)
 }
